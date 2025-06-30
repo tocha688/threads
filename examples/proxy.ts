@@ -12,13 +12,14 @@ class TestClass {
         console.log("add", data);
         return data + 1;
     }
-    sync(){
+    sync() {
         return new Promise((resolve) => {
             setTimeout(() => {
                 resolve("sync data");
             }, 1000);
         });
     }
+    static fack = "you baba"
 }
 
 if (isMainThread) {
@@ -33,9 +34,11 @@ if (isMainThread) {
         console.error("Error from worker:", err);
     });
     const test = await pool.newProxy(TestClass, { a: 111 })
+    const testStatic = await pool.staticPorxy(TestClass);
     console.log("Name:", await test.get("name"));
     console.log("add:", await test.call("add", 11));
     console.log("sync:", await test.call("sync", 11));
+    console.log("static fack:", await testStatic.get("fack"));
 } else {
     worker.on("test", (data: any) => {
         console.log("Received data in worker:", data);

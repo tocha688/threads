@@ -20,6 +20,19 @@ type WorkerMessage = {
     error?: any;
 }
 
+const targetProxy = async (instance: Object, akey: string, data?: any) => {
+    const attrs = akey.substring(1).split(".")
+    const key = attrs.shift()
+    const prop = attrs.join(".");
+    if (key === "get") {
+        return new Function("obj", `return obj.` + prop)(instance)
+    } else if (key === "set") {
+        return new Function("obj", "value", `obj.${prop}=value`)(instance, data)
+    } else if (key === "call") {
+        return await new Function("obj", "value", `return obj.${prop}(value)`)(instance, data)
+    }
+}
+
 //主服务
 export class MessageBox {
     private ons = new Map<string, MessageListen>();
@@ -88,16 +101,21 @@ export class MessageBox {
                         return error(new Error(`Worker instance not found: ${data.id}`));
                     }
                     try {
-                        const attrs = data.key.substring(1).split(".")
-                        const key = attrs.shift()
-                        const prop = attrs.join(".");
-                        if (key === "get") {
-                            result(new Function("obj", `return obj.` + prop)(instance))
-                        } else if (key === "set") {
-                            result(new Function("obj", "value", `obj.${prop}=value`)(instance, data.data))
-                        } else if (key === "call") {
-                            result(await new Function("obj", "value", `return obj.${prop}(value)`)(instance, data.data))
-                        }
+                        result(await targetProxy(instance, data.key, data.data));
+                    } catch (e) {
+                        error(e);
+                    }
+                } else if (data.key[0] === "#") {
+                    //静态调用
+                    const attrs = data.key.substring(1).split("$")
+                    let target = attrs.shift()
+                    const instance = this.proxys.get(target || "")
+                    if (!instance) {
+                        return error(new Error(`Worker static proxy not found: ${data.id}`));
+                    }
+                    const ekey = attrs.join(".")
+                    try {
+                        result(await targetProxy(instance, "$" + ekey, data.data));
                     } catch (e) {
                         error(e);
                     }
@@ -152,20 +170,31 @@ export class MessageBox {
 
 
     //添加代理对象
-    //addProxy("Test",new TestClass())
+    //addProxy(TestClass)
     addProxy<T = Object>(target: T) {
         const name = (target as any).name;
         this.proxys.set(name, target);
         console.log("Add proxy:", name, target);
     }
 
-    async newProxy(key: string, data?: any) {
+    async newProxy(target: string | Object, data?: any) {
         const id = rid()
-        await this.send<any>("proxy", key, data, undefined, id);
+        const className = typeof target === "string" ? target : (target as any).name;
+        await this.send<any>("proxy", className, data, undefined, id);
         return {
             get: async <T>(key: string): Promise<T> => await this.send<any>("proxy", "$get." + key, undefined, undefined, id),
-            set: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "$se." + key, data, undefined, id),
+            set: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "$set." + key, data, undefined, id),
             call: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "$call." + key, data, undefined, id),
+            static: this.staticPorxy(className),
+        }
+    }
+
+    staticPorxy(target: string | Object) {
+        const className = typeof target === "string" ? target : (target as any).name;
+        return {
+            get: async <T>(key: string): Promise<T> => await this.send<any>("proxy", "#" + className + "$get." + key, undefined, undefined),
+            set: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "#" + className + "$set." + key, data, undefined),
+            call: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "#" + className + "$call." + key, data, undefined),
         }
     }
 

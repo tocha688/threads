@@ -57,5 +57,10 @@ export class Threads {
         return await winfo.mbox.newProxy(key, data);
     }
 
+    staticPorxy(target: string | Object) {
+        const winfo = this.nextWorker();
+        return winfo.mbox.staticPorxy(target);
+    }
+
 }
 
