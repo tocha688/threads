@@ -2,6 +2,7 @@ import { MessageBox } from "./message";
 import { pLimit } from "./pLimit";
 import type { ThreadsOptions, WorkerInfo } from "./type";
 import os from "os";
+import path from "path";
 import { isMainThread, Worker } from "worker_threads";
 
 export class Threads {
@@ -13,6 +14,11 @@ export class Threads {
         private option: ThreadsOptions
     ) {
         if (!isMainThread) throw new Error("threads must be used in main thread");
+        const ext = path.extname(option.workerPath)
+        if (["js", "mjs", "cjs", "ts", "mts"].includes(ext)) {
+            option.workerPath += ".js";
+        }
+        option.workerPath = path.resolve(option.workerPath);
         this.initWorker();
         this.limit = pLimit(this.concurrency);
     }

@@ -1,28 +1,29 @@
 # Threads
 
-A thread management package for Node.js that supports proxy object instantiation.
+一个用于 Node.js 的线程处理包，支持代理对象实例化。
 
-## Features
+## 特性
 
-- Supports ES modules and CommonJS
-- TypeScript support
-- Compatible with Bun and Node.js
-- Supports proxy objects
-- Supports passing AbortController
+- 支持 ES 模块和 CommonJS
+- TypeScript 支持
+- Bun和node兼容
+- 支持代理对象
+- 支持传递AbortController
 
-## Installation
+
+## 安装
 
 ```bash
 npm install @tocha688/threads
-# or
+# 或
 yarn add @tocha688/threads
-# or
+# 或
 pnpm add @tocha688/threads
 ```
 
-## Usage
+## 使用
 
-### ES Modules (ESM)
+### ES 模块 (ESM)
 
 ```javascript
 import { ... } from '@tocha688/threads';
@@ -34,7 +35,7 @@ import { ... } from '@tocha688/threads';
 const { ... } = require('@tocha688/threads');
 ```
 
-### Simple Usage
+### 简单使用
 
 ```javascript
 import { isMainThread } from "bun";
@@ -58,8 +59,7 @@ if (isMainThread) {
     });
 }
 ```
-
-### Proxy Objects
+### 代理对象
 
 ```javascript
 
@@ -97,17 +97,17 @@ if (isMainThread) {
     }).catch(err => {
         console.error("Error from worker:", err);
     });
-    // Instantiate object
+    //实例化对象
     const test = await pool.newProxy(TestClass, { a: 111 })
-    // Get static object
+    //获取静态对象
     const testStatic = await pool.staticPorxy(TestClass);
-    // Get object properties, supports a.b.c
+    //获取对象上面的值，支持 a.b.c
     console.log("Name:", await test.get("name"));
     console.log("add:", await test.call("add", 11));
     console.log("sync:", await test.call("sync", 11));
     console.log("static fack:", await testStatic.get("fack"));
 } else {
-    // In worker
+    //worker中
     worker.on("test", (data: any) => {
         console.log("Received data in worker:", data);
         return { result: data.a + data.b };
@@ -116,6 +116,8 @@ if (isMainThread) {
 }
 ```
 
-## License
+
+
+## 许可证
 
 MIT
