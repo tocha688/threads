@@ -14,7 +14,7 @@ export type MessageOptions = {
 
 type WorkerMessage = {
     id: string;
-    type: "call" | "result" | "error" | string;
+    type: "call" | "result" | "error" | "proxy" | string;
     data?: any;
     key?: string;
     error?: any;
@@ -24,13 +24,16 @@ type WorkerMessage = {
 export class MessageBox {
     private ons = new Map<string, MessageListen>();
     private fns = new Map<string, Function>();
+    //代理对象
+    private proxys = new Map<string, any>();
+    private instances = new Map<string, any>();
 
     constructor(
         private option: MessageOptions
     ) {
         //监听消息
-        this.option.on((data:any) => {
-            if(data instanceof MessageEvent){
+        this.option.on((data: any) => {
+            if (data instanceof MessageEvent) {
                 data = data.data;
             }
             this.listenCallback(data);
@@ -44,7 +47,7 @@ export class MessageBox {
             const error = (err: any) => this.option.send({ id: data.id, type: "error", data: null, error: err, key: data.key });
             if (["result", "error"].includes(data.type)) {
                 const call = this.ons.get(data.id);
-                if(!call) return console.warn(`Worker message not found: ${data.id}`);
+                if (!call) return console.warn(`Worker message not found: ${data.id}`);
                 if (data.type === "result") {
                     if (call.resolve) {
                         call.resolve(data.data);
@@ -76,13 +79,50 @@ export class MessageBox {
                 } catch (e) {
                     error(e);
                 }
+            } else if (data.type === "proxy" && data.key) {
+                //处理代理对象
+                if (data.key[0] === "$") {
+                    //调用对象
+                    const instance = this.instances.get(data.id)
+                    if (!instance) {
+                        return error(new Error(`Worker instance not found: ${data.id}`));
+                    }
+                    try {
+                        const attrs = data.key.substring(1).split(".")
+                        const key = attrs.shift()
+                        const prop = attrs.join(".");
+                        if (key === "get") {
+                            result(new Function("obj", `return obj.` + prop)(instance))
+                        } else if (key === "set") {
+                            result(new Function("obj", "value", `obj.${prop}=value`)(instance, data.data))
+                        } else if (key === "call") {
+                            result(await new Function("obj", "value", `return obj.${prop}(value)`)(instance, data.data))
+                        }
+                    } catch (e) {
+                        error(e);
+                    }
+                } else {
+                    //初始化对象
+                    const cls = this.proxys.get(data.key);
+                    console.log(this.proxys, data.key, cls, typeof cls);
+                    if (!cls) {
+                        return error(new Error(`Worker proxy not found: ${data.key}`));
+                    }
+                    try {
+                        const instance = new cls(data.data);
+                        this.instances.set(data.id, instance);
+                        result({});
+                    } catch (e) {
+                        error(e);
+                    }
+                }
+
             }
         }
     }
 
-    async send<T>(type: string, key: string, data: any, callback?: (result: T) => void): Promise<T> {
+    async send<T>(type: string, key: string, data?: any, callback?: (result: T) => void, id: string = rid()): Promise<T> {
         return new Promise<T>((resolve, reject) => {
-            const id = rid();
             const back = (result: T) => {
                 if (callback) {
                     callback(result);
@@ -109,6 +149,26 @@ export class MessageBox {
     remove(key: string) {
         this.fns.delete(key);
     }
+
+
+    //添加代理对象
+    //addProxy("Test",new TestClass())
+    addProxy<T = Object>(target: T) {
+        const name = (target as any).name;
+        this.proxys.set(name, target);
+        console.log("Add proxy:", name, target);
+    }
+
+    async newProxy(key: string, data?: any) {
+        const id = rid()
+        await this.send<any>("proxy", key, data, undefined, id);
+        return {
+            get: async <T>(key: string): Promise<T> => await this.send<any>("proxy", "$get." + key, undefined, undefined, id),
+            set: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "$se." + key, data, undefined, id),
+            call: async <T>(key: string, data?: any): Promise<T> => await this.send<any>("proxy", "$call." + key, data, undefined, id),
+        }
+    }
+
 
 }
 

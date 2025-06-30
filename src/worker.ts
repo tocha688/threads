@@ -19,5 +19,9 @@ export class worker {
         this.init();
         this.mbox.on(key, fn);
     }
+    //代理对象
+    static async proxy<T = Object>(cls: T) {
+        this.mbox.addProxy(cls);
+    }
 
 }

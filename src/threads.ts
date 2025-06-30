@@ -36,14 +36,25 @@ export class Threads {
         }
     }
 
-    async call<T = any>(key: string, data?: any): Promise<T> {
+    private nextWorker() {
         if (this.workers.length === 0) throw new Error("No workers available");
         if (this.index >= this.workers.length) {
             this.index = 0;
         }
         const winfo = this.workers[this.index++];
         if (!winfo) throw new Error("Worker not found");
+        return winfo;
+    }
+
+    async call<T = any>(key: string, data?: any): Promise<T> {
+        const winfo = this.nextWorker();
         return this.limit(() => winfo.mbox.emit<T>(key, data))
+    }
+
+    async newProxy(className: string | Object, data?: any) {
+        const winfo = this.nextWorker();
+        const key = typeof className === "string" ? className : (className as any).name;
+        return await winfo.mbox.newProxy(key, data);
     }
 
 }
