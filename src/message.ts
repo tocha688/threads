@@ -1,4 +1,5 @@
-import { rid } from "./util";
+import { EventEmitter } from "events";
+import { isNull, rid } from "./util";
 
 type MessageListen = {
     callback?: Function;
@@ -14,10 +15,14 @@ export type MessageOptions = {
 
 type WorkerMessage = {
     id: string;
-    type: "call" | "result" | "error" | "proxy" | string;
+    //变量id
+    aid: string;
+    type: "call" | "result" | "error" | "proxy" | "updateArgs" | string;
     data?: any;
     key?: string;
     error?: any;
+    __type__?: string; //用于标识数据类型
+    __build__?: string; //用于标识数据构建类型
 }
 
 const targetProxy = async (instance: Object, akey: string, data?: any) => {
@@ -32,6 +37,7 @@ const targetProxy = async (instance: Object, akey: string, data?: any) => {
         return await new Function("obj", "value", `return obj.${prop}(value)`)(instance, data)
     }
 }
+
 
 //主服务
 export class MessageBox {
@@ -60,7 +66,7 @@ export class MessageBox {
             const error = (err: any) => this.option.send({ id: data.id, type: "error", data: null, error: err, key: data.key });
             if (["result", "error"].includes(data.type)) {
                 const call = this.ons.get(data.id);
-                if (!call) return console.warn(`Worker message not found: ${data.id}`);
+                if (!call) return //console.warn(`Worker message not found: ${data.id}`);
                 if (data.type === "result") {
                     if (call.resolve) {
                         call.resolve(data.data);
@@ -88,7 +94,9 @@ export class MessageBox {
                 }
                 //运行方法
                 try {
-                    result(await callback(data.data));
+                    const argData = this.dataDecode(data, data.data);
+                    console.log("Worker call:", data.key, argData);
+                    result(await callback(argData));
                 } catch (e) {
                     error(e);
                 }
@@ -135,9 +143,88 @@ export class MessageBox {
                     }
                 }
 
+            } else if (data.type == "updateArgs" && data.aid) {
+                const event = this.args.get(data.aid);
+                if (event) {
+                    switch (data.__type__) {
+                        case "update":
+                            event.emit("update", this.dataDecode(data, data.data));
+                            break;
+                        case "close":
+                            event.emit("close", data.data, data.aid);
+                            break;
+                    }
+                    result(true)
+                }
             }
         }
     }
+
+    private args = new Map<string, EventEmitter>();
+
+
+    private dataLinsen(aid: string, update: (val: any) => any) {
+        const event = new EventEmitter();
+        event.addListener("close", (value: any, aid: string) => {
+            if (this.args.has(aid)) {
+                this.args.delete(aid);
+                update(value)
+            }
+            event.removeAllListeners();
+        });
+        event.addListener("update", update);
+        this.args.set(aid, event);
+    }
+
+    //编码data数据
+    private dataEncode(data: any, id: string) {
+        if (data instanceof AbortController) {
+            const msg = { __build__: "AbortController", aid: rid(), id };
+            const controller = data as AbortController;
+            this.dataLinsen(msg.aid, (val: boolean) => val === true && controller.abort());
+            (!controller.signal.aborted) && controller.signal.addEventListener("abort", async () => {
+                this.args.delete(msg.aid);
+                await this.option.send({ type: "updateArgs", __type__: "close", ...msg, data: controller.signal.aborted });
+            });
+            data = { ...msg, data: data.signal.aborted };
+        } else if (data instanceof Array) {
+            data = data.map(item => this.dataEncode(item, id));
+        } else if (data instanceof Object) {
+            for (const key in data) {
+                if (data.hasOwnProperty(key)) {
+                    data[key] = this.dataEncode(data[key], id);
+                }
+            }
+        }
+        return data;
+    }
+
+    private dataDecode(req: WorkerMessage, args?: any): any {
+        if (args && args.__build__ === "AbortController") {
+            const controller = new AbortController();
+            if (args.data === false) {
+                this.dataLinsen(args.aid, (val: boolean) => val === true && controller.abort());
+                controller.signal.addEventListener("abort", () => {
+                    this.args.delete(args.aid);
+                    this.option.send({ ...args, type: "updateArgs", __type__: "close", data: controller.signal.aborted, });
+                });
+            } else {
+                controller.abort();
+            }
+            return controller;
+        } else if (args instanceof Array) {
+            return args.map(item => this.dataDecode(req, item));
+        } else if (args instanceof Object) {
+            for (const key in args) {
+                if (args.hasOwnProperty(key)) {
+                    args[key] = this.dataDecode(req, args[key]);
+                }
+            }
+        }
+        return args;
+    }
+
+
 
     async send<T>(type: string, key: string, data?: any, callback?: (result: T) => void, id: string = rid()): Promise<T> {
         return new Promise<T>((resolve, reject) => {
@@ -152,6 +239,9 @@ export class MessageBox {
                 callback: back,
                 once: !callback,
             });
+            if (data) {
+                data = this.dataEncode(data, id);
+            }
             this.option.send({ id, type, data, key })
         })
     }
