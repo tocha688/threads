@@ -1,4 +1,4 @@
-import { MessageBox } from "./message";
+import { MessageServer } from "./message";
 import { pLimit } from "./pLimit";
 import type { ThreadsOptions, WorkerInfo } from "./type";
 import os from "os";
@@ -34,7 +34,7 @@ export class Threads {
     private initWorker() {
         for (let i = 0; i < this.workerSize; i++) {
             const worker = new Worker(this.option.workerPath, this.option.workerOptions);
-            const mbox = new MessageBox({
+            const mbox = new MessageServer({
                 send: (data: any) => worker.postMessage(data),
                 on: (callback: Function) => worker.addListener("message", (data) => callback(data))
             })
@@ -57,15 +57,27 @@ export class Threads {
         return this.limit(() => winfo.mbox.emit<T>(key, data))
     }
 
-    async newProxy(className: string | Object, data?: any) {
+    async newClass(className: string | Object, data?: any) {
         const winfo = this.nextWorker();
         const key = typeof className === "string" ? className : (className as any).name;
-        return await winfo.mbox.newProxy(key, data);
+        return await winfo.mbox.newClass(key, data);
     }
 
-    staticPorxy(target: string | Object) {
+    staticClass(target: string | Object) {
         const winfo = this.nextWorker();
-        return winfo.mbox.staticPorxy(target);
+        return winfo.mbox.staticClass(target);
+    }
+
+    addShared(key: string, target: any) {
+        this.workers.forEach(winfo => {
+            winfo.mbox.addShared(key, target);
+        })
+    }
+    
+    delShared(key: string) {
+        this.workers.forEach(winfo => {
+            winfo.mbox.delShared(key);
+        })
     }
 
 }

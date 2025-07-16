@@ -33,8 +33,8 @@ if (isMainThread) {
     }).catch(err => {
         console.error("Error from worker:", err);
     });
-    const test = await pool.newProxy(TestClass, { a: 111 })
-    const testStatic = await pool.staticPorxy(TestClass);
+    const test = await pool.newClass(TestClass, { a: 111 })
+    const testStatic = await pool.staticClass(TestClass);
     console.log("Name:", await test.get("name"));
     console.log("add:", await test.call("add", 11));
     console.log("sync:", await test.call("sync", 11));
@@ -44,5 +44,5 @@ if (isMainThread) {
         console.log("Received data in worker:", data);
         return { result: data.a + data.b };
     });
-    worker.proxy(TestClass)
+    worker.addClass(TestClass)
 }

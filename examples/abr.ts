@@ -16,9 +16,10 @@ if (isMainThread) {
     }, 2000);
 } else {
     worker.on("abr", (data: AbortController) => {
-        console.log(data);
+        console.log("worker abr", data.signal.aborted);
         data.signal.addEventListener("abort", () => {
             console.log("Abort signal received in worker", data.signal.aborted);
         });
+        return data.signal.aborted
     });
 }

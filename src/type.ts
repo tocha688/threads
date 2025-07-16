@@ -1,4 +1,4 @@
-import type { MessageBox } from "./message";
+import type { MessageServer } from "./message";
 import type { Worker, WorkerOptions } from "worker_threads";
 
 export type ThreadsOptions = {
@@ -25,5 +25,5 @@ export type ThreadsOptions = {
 
 export type WorkerInfo = {
     worker: Worker;
-    mbox: MessageBox;
+    mbox: MessageServer;
 }
