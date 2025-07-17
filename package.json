@@ -1,6 +1,6 @@
 {
   "name": "@tocha688/threads",
-  "version": "0.1.1",
+  "version": "0.1.4",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -48,6 +48,6 @@
     ]
   },
   "dependencies": {
-    "universal-message": "^0.1.3"
+    "universal-message": "^0.1.4"
   }
 }
