@@ -10,13 +10,13 @@ export class worker {
 
     private static isInit = false;
     private static init() {
+        if (isMainThread || !parentPort) throw new Error("workerExport must be used in worker thread");
         if (this.isInit) return;
         this.isInit = true;
         //初始化
     }
 
     static async on(key: string, fn: (data: any, msg: MessageInfo) => void) {
-        if (isMainThread || !parentPort) throw new Error("workerExport must be used in worker thread");
         this.init();
         this.mbox.on(key, fn);
     }
@@ -29,5 +29,11 @@ export class worker {
         return this.mbox.loadShared(key);
     }
 
+    static export(key:string,fn:(...args:any[])=>any) {
+        this.init();
+        this.mbox.on(key, (data:any[], msg: MessageInfo) => {
+            return fn(...data)
+        });
+    }
 
 }

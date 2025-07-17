@@ -48,6 +48,6 @@
     ]
   },
   "dependencies": {
-    "universal-message": "^0.1.2"
+    "universal-message": "^0.1.3"
   }
 }
