@@ -1,4 +1,4 @@
-import type { MessageServer } from "./message";
+import type { MessageServer } from "universal-message";
 import type { Worker, WorkerOptions } from "worker_threads";
 
 export type ThreadsOptions = {

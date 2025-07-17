@@ -1,4 +1,4 @@
-import { MessageServer } from "./message";
+import { MessageServer } from "universal-message";
 import { pLimit } from "./pLimit";
 import type { ThreadsOptions, WorkerInfo } from "./type";
 import os from "os";
@@ -78,6 +78,14 @@ export class Threads {
         this.workers.forEach(winfo => {
             winfo.mbox.delShared(key);
         })
+    }
+
+    close(){
+        this.workers.forEach(winfo => {
+            winfo.worker.terminate();
+        });
+        this.workers = [];
+        this.index = 0;
     }
 
 }

@@ -32,13 +32,15 @@ if (isMainThread) {
     const t = new TestClass("test");
     console.log(t)
     pool.addShared("test", t)
-    pool.call("test", { a: 1, b: 2 }).then((data) => {
+    await pool.call("test", { a: 1, b: 2 }).then((data) => {
         console.log("Received data:", data);
     });
+    pool.close()
 } else {
     worker.on("test", async (data: any) => {
         console.log("Received data in worker:", data);
         console.log(await worker.loadShared("test").get("name"))
+        console.log(await worker.loadShared("test").call("add", 9))
         return { result: data.a + data.b };
     });
 }

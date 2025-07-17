@@ -1,4 +1,4 @@
-import { MessageClient, type MessageInfo } from "./message";
+import { MessageClient, type MessageInfo } from "universal-message";
 import { parentPort, isMainThread } from "worker_threads";
 
 

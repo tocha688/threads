@@ -46,5 +46,8 @@
     "onlyBuiltDependencies": [
       "esbuild"
     ]
+  },
+  "dependencies": {
+    "universal-message": "^0.1.1"
   }
 }
