@@ -73,19 +73,25 @@ export class Threads {
             winfo.mbox.addShared(key, target);
         })
     }
-    
+
     delShared(key: string) {
         this.workers.forEach(winfo => {
             winfo.mbox.delShared(key);
         })
     }
 
-    close(){
+    close() {
         this.workers.forEach(winfo => {
             winfo.worker.terminate();
         });
         this.workers = [];
         this.index = 0;
+    }
+
+    addClass(...cls: Array<Object>) {
+        this.workers.forEach(winfo => {
+            cls.forEach(ls => winfo.mbox.addClass(ls))
+        })
     }
 
 }

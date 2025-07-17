@@ -21,12 +21,13 @@ export class worker {
         this.mbox.on(key, fn);
     }
 
-    static async addClass<T = Object>(cls: T) {
-        this.mbox.addClass(cls);
+    static addClass(...cls: Array<Object>) {
+        cls.forEach(ls => this.mbox.addClass(ls))
     }
 
     static loadShared(key: string) {
         return this.mbox.loadShared(key);
     }
+
 
 }
