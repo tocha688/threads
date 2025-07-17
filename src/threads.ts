@@ -42,7 +42,7 @@ export class Threads {
         }
     }
 
-    private nextWorker() {
+    nextWorker() {
         if (this.workers.length === 0) throw new Error("No workers available");
         if (this.index >= this.workers.length) {
             this.index = 0;
