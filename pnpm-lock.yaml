@@ -12,8 +12,8 @@ importers:
         specifier: ^5
         version: 5.8.3
       universal-message:
-        specifier: ^0.1.7
-        version: 0.1.7(typescript@5.8.3)
+        specifier: ^0.1.8
+        version: 0.1.8(typescript@5.8.3)
     devDependencies:
       '@types/bun':
         specifier: latest
@@ -649,8 +649,8 @@ packages:
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
-  universal-message@0.1.7:
-    resolution: {integrity: sha512-cpoPC5rSxUjSO1Shkxe4z2MMDYmcRH3XplnzHRHP7vwRJlP/CYz5Qk14kEi/cnn3dQhaBKebovGeGCmKELcIQw==}
+  universal-message@0.1.8:
+    resolution: {integrity: sha512-epbNMs4Df2NcsXIY4EVHXUdEBrln8hg1g8TZx6PFgsq+yGGBh6cYPAntw4+It9yMp89lIbaEyrY3ycFZfL1K5w==}
     peerDependencies:
       typescript: ^5
 
@@ -1187,7 +1187,7 @@ snapshots:
 
   undici-types@7.8.0: {}
 
-  universal-message@0.1.7(typescript@5.8.3):
+  universal-message@0.1.8(typescript@5.8.3):
     dependencies:
       class-transformer: 0.5.1
       reflect-metadata: 0.2.2
