@@ -1,8 +1,8 @@
 
 import { isMainThread } from "bun";
 import { worker, Threads } from "../src";
-// import 'reflect-metadata';
 
+//也支持class-transformer的装饰器
 class TestClass {
     name = "TestClass1111";
     constructor(private data: any) {
@@ -28,18 +28,21 @@ if (isMainThread) {
         workerSize: 4,
         concurrency: 4,
     })
-    const test = new TestClass("111")
-    pool.addClass(TestClass)
-    pool.call("test", test).then(res => {
+    pool.call("test", { a: 1, b: 2 }).then(res => {
         console.log("Result from worker:", res);
     }).catch(err => {
         console.error("Error from worker:", err);
     });
-
+    const test = await pool.newClass(TestClass, { a: 111 })
+    const testStatic = await pool.staticClass(TestClass);
+    console.log("Name:", await test.get("name"));
+    console.log("add:", await test.call("add", 11));
+    console.log("sync:", await test.call("sync", 11));
+    console.log("static fack:", await testStatic.get("fack"));
 } else {
-    worker.on("test", (data: TestClass) => {
-        console.log("add", data.add(1))
+    worker.on("test", (data: any) => {
         console.log("Received data in worker:", data);
+        return { result: data.a + data.b };
     });
     worker.addClass(TestClass)
 }

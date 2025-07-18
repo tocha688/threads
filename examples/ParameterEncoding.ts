@@ -1,7 +1,7 @@
 
 import { isMainThread } from "bun";
 import { worker, Threads } from "../src";
-
+// import 'reflect-metadata';
 
 class TestClass {
     name = "TestClass1111";
@@ -21,6 +21,11 @@ class TestClass {
     }
     static fack = "you baba"
 }
+//将类添加到 worker 中进行解析。
+//添加后的类都将自动转换
+function initClass(target: any) {
+    target.addClass(TestClass)
+}
 
 if (isMainThread) {
     const pool = new Threads({
@@ -28,21 +33,20 @@ if (isMainThread) {
         workerSize: 4,
         concurrency: 4,
     })
-    pool.call("test", { a: 1, b: 2 }).then(res => {
+    //要自动编码必须要添加原始类
+    pool.addClass(TestClass)
+    //传递类
+    const test = new TestClass("111")
+    pool.call("test", test).then(res => {
         console.log("Result from worker:", res);
     }).catch(err => {
         console.error("Error from worker:", err);
     });
-    const test = await pool.newClass(TestClass, { a: 111 })
-    const testStatic = await pool.staticClass(TestClass);
-    console.log("Name:", await test.get("name"));
-    console.log("add:", await test.call("add", 11));
-    console.log("sync:", await test.call("sync", 11));
-    console.log("static fack:", await testStatic.get("fack"));
 } else {
-    worker.on("test", (data: any) => {
+    worker.on("test", (data: TestClass) => {
+        console.log("add", data.add(1))
         console.log("Received data in worker:", data);
-        return { result: data.a + data.b };
     });
+    //要自动解码也必须添加原始类
     worker.addClass(TestClass)
 }

@@ -15,11 +15,13 @@ if (isMainThread) {
         abr.abort();
     }, 2000);
 } else {
-    worker.on("abr", (data: AbortController) => {
+    worker.export("abr", (data: AbortController) => {
         console.log("worker abr", data.signal.aborted);
         data.signal.addEventListener("abort", () => {
             console.log("Abort signal received in worker", data.signal.aborted);
         });
+        // 也可以在方法中使用，内置的插件会将结果同步到主线程中去
+        // data.abort()
         return data.signal.aborted
     });
 }
