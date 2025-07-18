@@ -2,7 +2,6 @@
 import { isMainThread } from "bun";
 import { worker, Threads } from "../src";
 
-//也支持class-transformer的装饰器
 class TestClass {
     name = "TestClass1111";
     constructor(private data: any) {
@@ -40,7 +39,7 @@ if (isMainThread) {
     console.log("sync:", await test.call("sync", 11));
     console.log("static fack:", await testStatic.get("fack"));
 } else {
-    worker.on("test", (data: any) => {
+    worker.export("test", (data: any) => {
         console.log("Received data in worker:", data);
         return { result: data.a + data.b };
     });

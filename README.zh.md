@@ -1,5 +1,7 @@
 # Threads
 
+**中文 | [English](README.md)**
+
 一个用于 Node.js 的线程处理包，支持代理对象实例化。
 
 ## 特性
@@ -61,8 +63,10 @@ if (isMainThread) {
 ```
 
 ### 高级教程
-
-
+[AbortController](https://github.com/tocha688/threads/blob/main/examples/AbortController.ts)
+[参数自动编码解码](https://github.com/tocha688/threads/blob/main/examples/ParameterEncoding.ts)
+[代理对象](https://github.com/tocha688/threads/blob/main/examples/ProxyClass.ts)
+[共享变量](https://github.com/tocha688/threads/blob/main/examples/shared.ts)
 
 
 ## 许可证

@@ -43,7 +43,7 @@ if (isMainThread) {
         console.error("Error from worker:", err);
     });
 } else {
-    worker.on("test", (data: TestClass) => {
+    worker.export("test", (data: TestClass) => {
         console.log("add", data.add(1))
         console.log("Received data in worker:", data);
     });

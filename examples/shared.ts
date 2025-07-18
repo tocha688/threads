@@ -31,16 +31,16 @@ if (isMainThread) {
     })
     const t = new TestClass("test");
     console.log(t)
-    pool.addShared("test", t)
+    pool.addShared("test_obj", t)
     await pool.call("test", { a: 1, b: 2 }).then((data) => {
         console.log("Received data:", data);
     });
     pool.close()
 } else {
-    worker.on("test", async (data: any) => {
+    worker.export("test", async (data: any) => {
         console.log("Received data in worker:", data);
-        console.log(await worker.loadShared("test").get("name"))
-        console.log(await worker.loadShared("test").call("add", 9))
+        console.log(await worker.loadShared("test_obj").get("name"))
+        console.log(await worker.loadShared("test_obj").call("add", 9))
         return { result: data.a + data.b };
     });
 }
