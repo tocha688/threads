@@ -12,8 +12,8 @@ importers:
         specifier: ^5
         version: 5.8.3
       universal-message:
-        specifier: ^0.1.8
-        version: 0.1.8(typescript@5.8.3)
+        specifier: ^0.1.11
+        version: 0.1.11(typescript@5.8.3)
     devDependencies:
       '@types/bun':
         specifier: latest
@@ -424,6 +424,9 @@ packages:
   fix-dts-default-cjs-exports@1.0.1:
     resolution: {integrity: sha512-pVIECanWFC61Hzl2+oOCtoJ3F17kglZC/6N94eRWycFgBH35hHx0Li604ZIzhseh97mf2p0cv7vVrOZGoqhlEg==}
 
+  flatted@3.3.3:
+    resolution: {integrity: sha512-GX+ysw4PBCz0PzosHDepZGANEuFCMLrnRTiEy9McGjmkCQYwRq4A/X786G/fjM/+OjsWSU1ZrY5qyARZmO/uwg==}
+
   foreground-child@3.3.1:
     resolution: {integrity: sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw==}
     engines: {node: '>=14'}
@@ -649,8 +652,8 @@ packages:
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
-  universal-message@0.1.8:
-    resolution: {integrity: sha512-epbNMs4Df2NcsXIY4EVHXUdEBrln8hg1g8TZx6PFgsq+yGGBh6cYPAntw4+It9yMp89lIbaEyrY3ycFZfL1K5w==}
+  universal-message@0.1.11:
+    resolution: {integrity: sha512-dQL9J4MdeYaYMaPCI6O03eMn/pdtfd5cL+uXLJJ8bdA+Duf8vaznDuuosstIsHow1/CHRPdvbNFX2Rs1SKqBxA==}
     peerDependencies:
       typescript: ^5
 
@@ -962,6 +965,8 @@ snapshots:
       mlly: 1.7.4
       rollup: 4.45.1
 
+  flatted@3.3.3: {}
+
   foreground-child@3.3.1:
     dependencies:
       cross-spawn: 7.0.6
@@ -1187,9 +1192,10 @@ snapshots:
 
   undici-types@7.8.0: {}
 
-  universal-message@0.1.8(typescript@5.8.3):
+  universal-message@0.1.11(typescript@5.8.3):
     dependencies:
       class-transformer: 0.5.1
+      flatted: 3.3.3
       reflect-metadata: 0.2.2
       typescript: 5.8.3
 
