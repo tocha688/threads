@@ -12,8 +12,8 @@ importers:
         specifier: ^5
         version: 5.8.3
       universal-message:
-        specifier: ^0.1.11
-        version: 0.1.11(typescript@5.8.3)
+        specifier: ^0.1.12
+        version: 0.1.12(typescript@5.8.3)
     devDependencies:
       '@types/bun':
         specifier: latest
@@ -413,6 +413,9 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  fast-copy@3.0.2:
+    resolution: {integrity: sha512-dl0O9Vhju8IrcLndv2eU4ldt1ftXMqqfgN4H1cpmGV7P6jeB9FwpN9a2c8DPGE1Ys88rNUJVYDHq73CGAGOPfQ==}
+
   fdir@6.4.6:
     resolution: {integrity: sha512-hiFoqpyZcfNm1yc4u8oWCf9A2c4D3QjCrks3zmoVKVxpQRzmPNar1hUJcBG2RQHvEVGDN+Jm81ZheVLAQMK6+w==}
     peerDependencies:
@@ -652,8 +655,8 @@ packages:
   undici-types@7.8.0:
     resolution: {integrity: sha512-9UJ2xGDvQ43tYyVMpuHlsgApydB8ZKfVYTsLDhXkFL/6gfkp+U8xTGdh8pMJv1SpZna0zxG1DwsKZsreLbXBxw==}
 
-  universal-message@0.1.11:
-    resolution: {integrity: sha512-dQL9J4MdeYaYMaPCI6O03eMn/pdtfd5cL+uXLJJ8bdA+Duf8vaznDuuosstIsHow1/CHRPdvbNFX2Rs1SKqBxA==}
+  universal-message@0.1.12:
+    resolution: {integrity: sha512-NN97+EKYYKtsnYxQpKkOc38LwD2mkm/vDKYIAjqCLviYW9EFcn+UyBJc+WomBGgDGY0TQTp5SVnbwar6qm9JbA==}
     peerDependencies:
       typescript: ^5
 
@@ -955,6 +958,8 @@ snapshots:
       '@esbuild/win32-ia32': 0.25.6
       '@esbuild/win32-x64': 0.25.6
 
+  fast-copy@3.0.2: {}
+
   fdir@6.4.6(picomatch@4.0.3):
     optionalDependencies:
       picomatch: 4.0.3
@@ -1192,9 +1197,10 @@ snapshots:
 
   undici-types@7.8.0: {}
 
-  universal-message@0.1.11(typescript@5.8.3):
+  universal-message@0.1.12(typescript@5.8.3):
     dependencies:
       class-transformer: 0.5.1
+      fast-copy: 3.0.2
       flatted: 3.3.3
       reflect-metadata: 0.2.2
       typescript: 5.8.3
