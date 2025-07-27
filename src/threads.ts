@@ -4,6 +4,7 @@ import type { ThreadsOptions, WorkerInfo } from "./type";
 import os from "os";
 import path from "path";
 import { isMainThread, Worker } from "worker_threads";
+import fs from "fs";
 
 export class Threads {
     workers: WorkerInfo[] = [];
@@ -15,8 +16,18 @@ export class Threads {
     ) {
         if (!isMainThread) throw new Error("threads must be used in main thread");
         const ext = path.extname(option.workerPath)
-        if (["js", "mjs", "cjs", "ts", "mts"].includes(ext)) {
-            option.workerPath += ".js";
+        //去除后缀
+        const workerPath = option.workerPath.replace(ext, "");
+        const searchExtensions = [".js", ".mjs", ".cjs", ".ts", ".mts"];
+        if (!searchExtensions.includes(ext)) {
+            //自动搜索
+            for (const searchExt of searchExtensions) {
+                const fullPath = workerPath + searchExt;
+                if (fs.existsSync(fullPath)) {
+                    option.workerPath = fullPath;
+                    break;
+                }
+            }
         }
         option.workerPath = path.resolve(option.workerPath);
         this.initWorker();
