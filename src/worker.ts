@@ -10,8 +10,8 @@ export class worker {
 
     private static isInit = false;
     private static init() {
-        if (isMainThread || !parentPort) throw new Error("workerExport must be used in worker thread");
         if (this.isInit) return;
+        if (isMainThread || !parentPort) return;
         this.isInit = true;
         //初始化
     }
@@ -22,10 +22,12 @@ export class worker {
     }
 
     static addClass(...cls: Array<Object>) {
+        this.init();
         cls.forEach(ls => this.mbox.addClass(ls))
     }
 
     static loadShared(key: string) {
+        this.init();
         return this.mbox.loadShared(key);
     }
 
