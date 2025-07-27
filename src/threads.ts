@@ -63,12 +63,12 @@ export class Threads {
         return winfo;
     }
 
-    async call<T = any>(key: string, data?: any): Promise<T> {
+    async call<T = any>(key: string, ...data: any[]): Promise<T> {
         const winfo = this.nextWorker();
         return this.limit(() => winfo.mbox.emit<T>(key, data))
     }
 
-    async newClass(className: string | Object, data?: any) {
+    async newClass(className: string | Object, ...data: any[]) {
         const winfo = this.nextWorker();
         const key = typeof className === "string" ? className : (className as any).name;
         return await winfo.mbox.newClass(key, data);
