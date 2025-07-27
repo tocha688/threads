@@ -16,6 +16,7 @@ export class Threads {
     ) {
         if (!isMainThread) throw new Error("threads must be used in main thread");
         const ext = path.extname(option.workerPath)
+        option.workerPath = path.resolve(option.workerPath);
         //去除后缀
         const workerPath = option.workerPath.replace(ext, "");
         const searchExtensions = [".js", ".mjs", ".cjs", ".ts", ".mts"];
@@ -29,7 +30,6 @@ export class Threads {
                 }
             }
         }
-        option.workerPath = path.resolve(option.workerPath);
         this.initWorker();
         this.limit = pLimit(this.concurrency);
     }
